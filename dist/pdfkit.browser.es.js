@@ -4476,11 +4476,9 @@ var AnnotationsMixin = {
   goTo: function goTo(x, y, w, h, name) {
     var options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
 
-    console.log("options", options);
-    options.Subtype = "Link";
     options.A = this.ref({
       S: "GoTo",
-      D: [new String(name), "XYZ", null, null, null]
+      D: new String(name)
     });
     options.A.end();
     return this.annotate(x, y, w, h, options);
