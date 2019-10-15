@@ -1,0 +1,14 @@
+lib/font/tables/.DS_Store
+.DS_Store
+/node_modules/
+/tests/
+node-zlib/
+playground/
+build/
+demo/bundle.js
+*.html
+!demo/browser.html
+dist
+*.b64.afm
+.vscode
+coverage
