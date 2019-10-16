@@ -4485,7 +4485,7 @@ var AnnotationsMixin = {
         options.Subtype = "Link";
         options.A = this.ref({
             S: "GoTo",
-            D: [name, "XYZ", null, null, null]
+            D: [new String(name), "XYZ", null, null, null]
         });
         options.A.end();
         return this.annotate(x, y, w, h, options);
