@@ -4440,185 +4440,185 @@ var ImagesMixin = {
 };
 
 var AnnotationsMixin = {
-  annotate: function annotate(x, y, w, h, options) {
-    options.Type = "Annot";
-    options.Rect = this._convertRect(x, y, w, h);
-    options.Border = [0, 0, 0];
+    annotate: function annotate(x, y, w, h, options) {
+        options.Type = "Annot";
+        options.Rect = this._convertRect(x, y, w, h);
+        options.Border = [0, 0, 0];
 
-    if (options.Subtype !== "Link") {
-      if (options.C == null) {
-        options.C = this._normalizeColor(options.color || [0, 0, 0]);
-      }
-    } // convert colors
-    delete options.color;
+        if (options.Subtype !== "Link") {
+            if (options.C == null) {
+                options.C = this._normalizeColor(options.color || [0, 0, 0]);
+            }
+        } // convert colors
+        delete options.color;
 
-    if (typeof options.Dest === "string") {
-      options.Dest = new String(options.Dest);
-    }
+        if (typeof options.Dest === "string") {
+            options.Dest = new String(options.Dest);
+        }
 
-    // Capitalize keys
-    for (var key in options) {
-      var val = options[key];
-      options[key[0].toUpperCase() + key.slice(1)] = val;
-    }
+        // Capitalize keys
+        for (var key in options) {
+            var val = options[key];
+            options[key[0].toUpperCase() + key.slice(1)] = val;
+        }
 
-    var ref = this.ref(options);
-    this.page.annotations.push(ref);
-    ref.end();
-    return this;
-  },
-  note: function note(x, y, w, h, contents, options) {
-    if (options == null) {
-      options = {};
-    }
-    options.Subtype = "Text";
-    options.Contents = new String(contents);
-    options.Name = "Comment";
-    if (options.color == null) {
-      options.color = [243, 223, 92];
-    }
-    return this.annotate(x, y, w, h, options);
-  },
-  goTo: function goTo(x, y, w, h, name) {
-    var options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
+        var ref = this.ref(options);
+        this.page.annotations.push(ref);
+        ref.end();
+        return this;
+    },
+    note: function note(x, y, w, h, contents, options) {
+        if (options == null) {
+            options = {};
+        }
+        options.Subtype = "Text";
+        options.Contents = new String(contents);
+        options.Name = "Comment";
+        if (options.color == null) {
+            options.color = [243, 223, 92];
+        }
+        return this.annotate(x, y, w, h, options);
+    },
+    goTo: function goTo(x, y, w, h, name) {
+        var options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : {};
 
-    options.Subtype = "Link";
-    options.A = this.ref({
-      S: "GoTo",
-      D: new String(name)
-    });
-    options.A.end();
-    return this.annotate(x, y, w, h, options);
-  },
-  link: function link(x, y, w, h, url, options) {
-    if (options == null) {
-      options = {};
-    }
-    options.Subtype = "Link";
-
-    if (typeof url === "number") {
-      // Link to a page in the document (the page must already exist)
-      var pages = this._root.data.Pages.data;
-
-      if (url >= 0 && url < pages.Kids.length) {
+        options.Subtype = "Link";
         options.A = this.ref({
-          S: "GoTo",
-          D: [pages.Kids[url], "XYZ", null, null, null]
+            S: "GoTo",
+            D: [name, "XYZ", null, null, null]
         });
         options.A.end();
-      } else {
-        throw new Error("The document has no page " + url);
-      }
-    } else {
-      // Link to an external url
-      options.A = this.ref({
-        S: "URI",
-        URI: new String(url)
-      });
-      options.A.end();
-    }
+        return this.annotate(x, y, w, h, options);
+    },
+    link: function link(x, y, w, h, url, options) {
+        if (options == null) {
+            options = {};
+        }
+        options.Subtype = "Link";
 
-    return this.annotate(x, y, w, h, options);
-  },
-  _markup: function _markup(x, y, w, h, options) {
-    if (options == null) {
-      options = {};
-    }
+        if (typeof url === "number") {
+            // Link to a page in the document (the page must already exist)
+            var pages = this._root.data.Pages.data;
 
-    var _convertRect = this._convertRect(x, y, w, h),
-        _convertRect2 = slicedToArray(_convertRect, 4),
-        x1 = _convertRect2[0],
-        y1 = _convertRect2[1],
-        x2 = _convertRect2[2],
-        y2 = _convertRect2[3];
+            if (url >= 0 && url < pages.Kids.length) {
+                options.A = this.ref({
+                    S: "GoTo",
+                    D: [pages.Kids[url], "XYZ", null, null, null]
+                });
+                options.A.end();
+            } else {
+                throw new Error("The document has no page " + url);
+            }
+        } else {
+            // Link to an external url
+            options.A = this.ref({
+                S: "URI",
+                URI: new String(url)
+            });
+            options.A.end();
+        }
 
-    options.QuadPoints = [x1, y2, x2, y2, x1, y1, x2, y1];
-    options.Contents = new String();
-    return this.annotate(x, y, w, h, options);
-  },
-  highlight: function highlight(x, y, w, h, options) {
-    if (options == null) {
-      options = {};
-    }
-    options.Subtype = "Highlight";
-    if (options.color == null) {
-      options.color = [241, 238, 148];
-    }
-    return this._markup(x, y, w, h, options);
-  },
-  underline: function underline(x, y, w, h, options) {
-    if (options == null) {
-      options = {};
-    }
-    options.Subtype = "Underline";
-    return this._markup(x, y, w, h, options);
-  },
-  strike: function strike(x, y, w, h, options) {
-    if (options == null) {
-      options = {};
-    }
-    options.Subtype = "StrikeOut";
-    return this._markup(x, y, w, h, options);
-  },
-  lineAnnotation: function lineAnnotation(x1, y1, x2, y2, options) {
-    if (options == null) {
-      options = {};
-    }
-    options.Subtype = "Line";
-    options.Contents = new String();
-    options.L = [x1, this.page.height - y1, x2, this.page.height - y2];
-    return this.annotate(x1, y1, x2, y2, options);
-  },
-  rectAnnotation: function rectAnnotation(x, y, w, h, options) {
-    if (options == null) {
-      options = {};
-    }
-    options.Subtype = "Square";
-    options.Contents = new String();
-    return this.annotate(x, y, w, h, options);
-  },
-  ellipseAnnotation: function ellipseAnnotation(x, y, w, h, options) {
-    if (options == null) {
-      options = {};
-    }
-    options.Subtype = "Circle";
-    options.Contents = new String();
-    return this.annotate(x, y, w, h, options);
-  },
-  textAnnotation: function textAnnotation(x, y, w, h, text, options) {
-    if (options == null) {
-      options = {};
-    }
-    options.Subtype = "FreeText";
-    options.Contents = new String(text);
-    options.DA = new String();
-    return this.annotate(x, y, w, h, options);
-  },
-  _convertRect: function _convertRect(x1, y1, w, h) {
-    // flip y1 and y2
-    var y2 = y1;
-    y1 += h;
+        return this.annotate(x, y, w, h, options);
+    },
+    _markup: function _markup(x, y, w, h, options) {
+        if (options == null) {
+            options = {};
+        }
 
-    // make x2
-    var x2 = x1 + w;
+        var _convertRect = this._convertRect(x, y, w, h),
+            _convertRect2 = slicedToArray(_convertRect, 4),
+            x1 = _convertRect2[0],
+            y1 = _convertRect2[1],
+            x2 = _convertRect2[2],
+            y2 = _convertRect2[3];
 
-    // apply current transformation matrix to points
+        options.QuadPoints = [x1, y2, x2, y2, x1, y1, x2, y1];
+        options.Contents = new String();
+        return this.annotate(x, y, w, h, options);
+    },
+    highlight: function highlight(x, y, w, h, options) {
+        if (options == null) {
+            options = {};
+        }
+        options.Subtype = "Highlight";
+        if (options.color == null) {
+            options.color = [241, 238, 148];
+        }
+        return this._markup(x, y, w, h, options);
+    },
+    underline: function underline(x, y, w, h, options) {
+        if (options == null) {
+            options = {};
+        }
+        options.Subtype = "Underline";
+        return this._markup(x, y, w, h, options);
+    },
+    strike: function strike(x, y, w, h, options) {
+        if (options == null) {
+            options = {};
+        }
+        options.Subtype = "StrikeOut";
+        return this._markup(x, y, w, h, options);
+    },
+    lineAnnotation: function lineAnnotation(x1, y1, x2, y2, options) {
+        if (options == null) {
+            options = {};
+        }
+        options.Subtype = "Line";
+        options.Contents = new String();
+        options.L = [x1, this.page.height - y1, x2, this.page.height - y2];
+        return this.annotate(x1, y1, x2, y2, options);
+    },
+    rectAnnotation: function rectAnnotation(x, y, w, h, options) {
+        if (options == null) {
+            options = {};
+        }
+        options.Subtype = "Square";
+        options.Contents = new String();
+        return this.annotate(x, y, w, h, options);
+    },
+    ellipseAnnotation: function ellipseAnnotation(x, y, w, h, options) {
+        if (options == null) {
+            options = {};
+        }
+        options.Subtype = "Circle";
+        options.Contents = new String();
+        return this.annotate(x, y, w, h, options);
+    },
+    textAnnotation: function textAnnotation(x, y, w, h, text, options) {
+        if (options == null) {
+            options = {};
+        }
+        options.Subtype = "FreeText";
+        options.Contents = new String(text);
+        options.DA = new String();
+        return this.annotate(x, y, w, h, options);
+    },
+    _convertRect: function _convertRect(x1, y1, w, h) {
+        // flip y1 and y2
+        var y2 = y1;
+        y1 += h;
 
-    var _ctm = slicedToArray(this._ctm, 6),
-        m0 = _ctm[0],
-        m1 = _ctm[1],
-        m2 = _ctm[2],
-        m3 = _ctm[3],
-        m4 = _ctm[4],
-        m5 = _ctm[5];
+        // make x2
+        var x2 = x1 + w;
 
-    x1 = m0 * x1 + m2 * y1 + m4;
-    y1 = m1 * x1 + m3 * y1 + m5;
-    x2 = m0 * x2 + m2 * y2 + m4;
-    y2 = m1 * x2 + m3 * y2 + m5;
+        // apply current transformation matrix to points
 
-    return [x1, y1, x2, y2];
-  }
+        var _ctm = slicedToArray(this._ctm, 6),
+            m0 = _ctm[0],
+            m1 = _ctm[1],
+            m2 = _ctm[2],
+            m3 = _ctm[3],
+            m4 = _ctm[4],
+            m5 = _ctm[5];
+
+        x1 = m0 * x1 + m2 * y1 + m4;
+        y1 = m1 * x1 + m3 * y1 + m5;
+        x2 = m0 * x2 + m2 * y2 + m4;
+        y2 = m1 * x2 + m3 * y2 + m5;
+
+        return [x1, y1, x2, y2];
+    }
 };
 
 var PDFOutline = function () {
